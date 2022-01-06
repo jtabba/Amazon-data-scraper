@@ -8,19 +8,19 @@ const fetchData = async () => {
         const response = await axios.get(url)
         const html = response.data
         const $ = cheerio.load(html)
-        const earbuds = []
+        const data = []
 
         $("div.sg-col-4-of-12.s-result-item.s-asin.sg-col-4-of-16.sg-col.s-widget-spacing-small.sg-col-4-of-20").each((_idx, el) => {
-            const earbud = $(el)
-            const title = earbud.find("h2.a-size-mini.a-spacing-none.a-color-base.s-line-clamp-4").text()
-            const image = earbud.find("img.s-image").attr("src")
-            const link = earbud.find("a.a-link-normal.s-link-style.a-text-normal").attr("href")
-            const reviews = earbud.find('div.a-section.a-spacing-none.a-spacing-top-micro > div.a-row.a-size-small').children('span').last().attr('aria-label')
+            const product = $(el)
+            const title = product.find("h2.a-size-mini.a-spacing-none.a-color-base.s-line-clamp-4").text()
+            const image = product.find("img.s-image").attr("src")
+            const link = product.find("a.a-link-normal.s-link-style.a-text-normal").attr("href")
+            const reviews = product.find('div.a-section.a-spacing-none.a-spacing-top-micro > div.a-row.a-size-small').children('span').last().attr('aria-label')
 
-            const stars = earbud.find('div.a-section.a-spacing-none.a-spacing-top-micro > div > span').attr('aria-label')
-            const price = earbud.find("span.a-price > span.a-offscreen").text()
+            const stars = product.find('div.a-section.a-spacing-none.a-spacing-top-micro > div > span').attr('aria-label')
+            const price = product.find("span.a-price > span.a-offscreen").text()
 
-            let earbudData = {
+            let productData = {
                 title,
                 image,
                 link: `https://amazon.com.au${link}`,
@@ -28,29 +28,29 @@ const fetchData = async () => {
             }
 
             if (reviews) {
-                earbudData.reviews = reviews
+                productData.reviews = reviews
             }
 
             if (stars) {
-                earbudData.stars = stars
+                productData.stars = stars
             }
 
-            earbuds.push(earbudData)
+            data.push(productData)
 
-            let createCSV = earbuds.map(data => {
+            let createCSV = data.map(data => {
                 return Object.values(data).map(information => `"${information}"`).join(",")
             }).join("\n")
             
-            fs.writeFile('saved-earbuds.csv', "Title, Image, Link, Price, Reviews, Stars" + '\n' + createCSV, 'utf8', function (err) {
+            fs.writeFile('scraped-data.csv', "Title, Image, Link, Price, Reviews, Stars" + '\n' + createCSV, 'utf8', function (err) {
                 if (err) {
                     console.log("An error occurred - file either corrupted or unsaved.")
                 } else {
-                    console.log("Creation of saved-earbuds.csv successful.")
+                    console.log("Creation of saved-data.csv successful.")
                 }
             })
         })
 
-        return earbuds
+        return data
     } catch (error) {
         throw error
     }
@@ -59,7 +59,7 @@ const fetchData = async () => {
 }
 
 
-fetchData().then((earbuds) => console.log(earbuds))
+fetchData().then((data) => console.log(data))
 
 
 // const axios = require("axios");
